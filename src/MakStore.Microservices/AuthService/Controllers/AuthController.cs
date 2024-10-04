@@ -1,8 +1,8 @@
 using Asp.Versioning;
-using AuthService.Controllers.Base;
 using AuthService.Identity;
 using AuthService.Interfaces;
 using AuthService.Models.Auth;
+using MakStore.SharedComponents.Api;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 

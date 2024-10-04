@@ -1,4 +1,4 @@
-using EmployeeWebClient;
+using ProductsService;
 
 WebApplication.CreateBuilder(args)
     .ConfigureServices()

@@ -1,22 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using MakStore.SharedComponents.Authentication.Options;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace EmployeeWebClient.Auth;
-
-public static class MicroservicesAuthenticationDefaults
-{
-    public const string AuthenticationScheme = "MicroservicesAuthScheme";
-}
-
-public class MicroservicesAuthenticationOptions : AuthenticationSchemeOptions
-{
-    public string AccessTokenCookie { get; set; } = "AccessToken";
-    public string RefreshTokenCookie { get; set; } = "RefreshToken";
-    public string ValidateTokenUrl { get; set; }
-}
+namespace MakStore.SharedComponents.Authentication;
 
 public class MicroservicesAuthenticationHandler : AuthenticationHandler<MicroservicesAuthenticationOptions>
 {
@@ -32,9 +22,11 @@ public class MicroservicesAuthenticationHandler : AuthenticationHandler<Microser
         _httpClientFactory = httpClientFactory;
     }
 
+    protected override object? Events { get; set; }
+
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var accessToken = Request.Cookies[Options.AccessTokenCookie];
+        var accessToken = Options.AccessTokenProvider(Context);
         if (string.IsNullOrEmpty(accessToken))
         {
             return AuthenticateResult.NoResult();
@@ -42,7 +34,7 @@ public class MicroservicesAuthenticationHandler : AuthenticationHandler<Microser
 
         using var httpClient = _httpClientFactory.CreateClient();
         
-        var response = await httpClient.GetAsync(Options.ValidateTokenUrl + "?token={accessToken}");
+        var response = await httpClient.GetAsync(Options.ValidateAccessTokenUrl + $"?token={accessToken}");
         var responseContent = await response.Content.ReadAsStringAsync();
         
         if (!response.IsSuccessStatusCode || !responseContent.Equals("true"))
@@ -52,9 +44,8 @@ public class MicroservicesAuthenticationHandler : AuthenticationHandler<Microser
         
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadJwtToken(accessToken);
-        var claims = jwtToken.Claims.ToList(); 
         
-        var identity = new ClaimsIdentity(claims, Scheme.Name);
+        var identity = new ClaimsIdentity(jwtToken.Claims.ToList(), Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
         
         var ticket = new AuthenticationTicket(principal, Scheme.Name);

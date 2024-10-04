@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
-namespace AuthService.Configuration.Extensions;
+namespace AuthService.Configuration;
 
 public static class ConfigureServicesExtensions
 {

@@ -1,11 +1,17 @@
+using AuthService.Configuration;
 using AuthService.Data;
+using MakStore.SharedComponents.Exceptions;
+using MakStore.SharedComponents.Logging;
+using Serilog;
 
-namespace AuthService.Configuration.Extensions;
+namespace AuthService;
 
 public static class StartupExtension
 {
     public static WebApplicationBuilder ConfigureServices(this WebApplicationBuilder builder)
     {
+        builder.UseSerilog();
+        
         var services = builder.Services;
         var configuration = builder.Configuration;
         var env = builder.Environment;
@@ -42,7 +48,8 @@ public static class StartupExtension
         var env = app.Environment;
 
         services.InitializeApp();
-        
+        app.UseExceptionHandlingMiddleware();
+        app.UseSerilogRequestLogging();
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
@@ -55,9 +62,6 @@ public static class StartupExtension
             app.UseHsts();
             app.UseHttpsRedirection();
         }
-
-
-        
         
         app.UseRouting();
         

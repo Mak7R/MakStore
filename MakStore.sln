@@ -17,6 +17,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeWebClient", "src\Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService", "src\MakStore.Microservices\AuthService\AuthService.csproj", "{8764BB3C-FFF9-4BF4-96C6-02507D070680}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductsService", "src\MakStore.Microservices\ProductsService\ProductsService.csproj", "{5FF098C9-3FCA-43BA-8DCD-005812695F77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakStore.Domain", "src\MakStore.Shared\MakStore.Domain\MakStore.Domain.csproj", "{5C82F1F9-281A-4C23-A2D1-5A97FB2946CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakStore.SharedComponents", "src\MakStore.Shared\MakStore.SharedComponents\MakStore.SharedComponents.csproj", "{C8CA4E22-1EAF-49CD-93F9-D7360E548A7D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +31,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{E509E0A1-BF39-4CD7-98D6-AAAFFF7E0918} = {8F654013-AC24-4BC1-BCA7-E1C50D6611C2}
 		{8764BB3C-FFF9-4BF4-96C6-02507D070680} = {5CC06EDE-03CD-4481-BCA1-AE969E22D41A}
+		{5FF098C9-3FCA-43BA-8DCD-005812695F77} = {5CC06EDE-03CD-4481-BCA1-AE969E22D41A}
+		{5C82F1F9-281A-4C23-A2D1-5A97FB2946CC} = {C37D3ADE-1470-47DA-9FD8-7E6BE265804D}
+		{C8CA4E22-1EAF-49CD-93F9-D7360E548A7D} = {C37D3ADE-1470-47DA-9FD8-7E6BE265804D}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E509E0A1-BF39-4CD7-98D6-AAAFFF7E0918}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -35,5 +44,17 @@ Global
 		{8764BB3C-FFF9-4BF4-96C6-02507D070680}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8764BB3C-FFF9-4BF4-96C6-02507D070680}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8764BB3C-FFF9-4BF4-96C6-02507D070680}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FF098C9-3FCA-43BA-8DCD-005812695F77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FF098C9-3FCA-43BA-8DCD-005812695F77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FF098C9-3FCA-43BA-8DCD-005812695F77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FF098C9-3FCA-43BA-8DCD-005812695F77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C82F1F9-281A-4C23-A2D1-5A97FB2946CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C82F1F9-281A-4C23-A2D1-5A97FB2946CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C82F1F9-281A-4C23-A2D1-5A97FB2946CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C82F1F9-281A-4C23-A2D1-5A97FB2946CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8CA4E22-1EAF-49CD-93F9-D7360E548A7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8CA4E22-1EAF-49CD-93F9-D7360E548A7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8CA4E22-1EAF-49CD-93F9-D7360E548A7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8CA4E22-1EAF-49CD-93F9-D7360E548A7D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

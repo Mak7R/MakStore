@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace AuthService.Controllers.Base;
+namespace MakStore.SharedComponents.Api;
 
 [ApiController]
 [Route("api/v{version:apiVersion}")]

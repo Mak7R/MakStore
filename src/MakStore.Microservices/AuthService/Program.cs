@@ -1,4 +1,4 @@
-using AuthService.Configuration.Extensions;
+using AuthService;
 
 WebApplication
     .CreateBuilder(args)

@@ -31,7 +31,22 @@ services:
       - main_db
     networks:
       - makstore_net
-      
+  
+  products_service.makstore:
+    container_name: products_service.makstore
+    build:
+      context: .
+      dockerfile: src/MakStore.Microservices/ProductsService/Dockerfile
+    environment:
+      - ActiveConnection=DockerDatabase
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "9005:8080"
+    depends_on:
+      - main_db
+    networks:
+      - makstore_net
+  
   # Client Apps
   employeewebclient.makstore:
     container_name: employeewebclient.makstore

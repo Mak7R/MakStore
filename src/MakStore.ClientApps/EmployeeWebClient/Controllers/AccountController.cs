@@ -1,8 +1,7 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using EmployeeWebClient.Models.Account;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeWebClient.Controllers;
@@ -29,8 +28,7 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
             return View(loginViewModel);
-
-        // Подготовка запроса
+        
         using var httpClient = _httpClientFactory.CreateClient();
     
         var requestContent = new StringContent(JsonSerializer.Serialize(new
@@ -38,8 +36,7 @@ public class AccountController : Controller
             loginViewModel.Username,
             loginViewModel.Password
         }), Encoding.UTF8, "application/json");
-
-        // Отправка запроса на микросервис аутентификации
+        
         var response = await httpClient.PostAsync("http://auth_service.makstore:8080/api/v1/login", requestContent);
 
         if (!response.IsSuccessStatusCode)
@@ -48,28 +45,36 @@ public class AccountController : Controller
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View(loginViewModel);
         }
-
-        // Чтение данных из ответа
+        
         var responseBody = await response.Content.ReadAsStringAsync();
         var authResponse = JsonSerializer.Deserialize<AuthResponse>(responseBody);
-
-        // Сохранение токенов в cookies
+        
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = false, // Включайте для HTTPS
-            Expires = DateTime.UtcNow.AddDays(7) // Настройте срок действия cookie
+            Secure = false,
+            Expires = DateTime.UtcNow.AddDays(7)
         };
-
-        // Сохранение AccessToken
-        Response.Cookies.Append("AccessToken", authResponse.accessToken, cookieOptions);
-
-        // Сохранение RefreshToken
-        Response.Cookies.Append("RefreshToken", authResponse.refreshToken, cookieOptions);
         
-        // Редирект или логика успешного входа
+        Response.Cookies.Append("AccessToken", authResponse.AccessToken, cookieOptions);
+        Response.Cookies.Append("RefreshToken", authResponse.RefreshToken, cookieOptions);
+        
         return RedirectToAction("Index", "Home");
     }
 
-    private record AuthResponse(string userId, string accessToken, string refreshToken);
+    [HttpGet("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("AccessToken");
+        Response.Cookies.Delete("RefreshToken");
+        
+        return RedirectToAction("Index", "Home");
+    }
+    
+    
+    private record AuthResponse(
+        [property: JsonPropertyName("userId")] string UserId,
+        [property: JsonPropertyName("accessToken")] string AccessToken, 
+        [property: JsonPropertyName("refreshToken")] string RefreshToken
+        );
 }
