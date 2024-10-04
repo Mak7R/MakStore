@@ -1,0 +1,23 @@
+@model EmployeeWebClient.Models.Account.LoginViewModel
+
+@{
+    ViewBag.Title = "Login";
+}
+
+<form asp-controller="Account" asp-action="Login" method="post">
+    <div class="mb-2">
+        <label asp-for="Username"></label>
+        <input asp-for="Username"/>
+        <span asp-validation-for="Username"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Password"></label>
+        <input asp-for="Password"/>
+        <span asp-validation-for="Password"></span>
+    </div>
+
+    <div class="mb-2">
+        <button class="btn btn-primary" type="submit">Login</button>
+    </div>
+</form>
