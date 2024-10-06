@@ -29,7 +29,7 @@ public sealed class CreateProductCommandHandler : IRequestHandler<CreateProductC
         if (await _productsRepository.FindByNameAsync(request.Name, cancellationToken) != null)
             throw new AlreadyExistsException($"Product with name '{request.Name}' already exists");
         
-        var product = ApplicationMapper.Mapper.Map<CreateProductCommand, Product>(request);
+        var product = ApplicationMapper.Mapper.Map<Product>(request);
         
         var productResponse = await _productsRepository.CreateAsync(product, cancellationToken);
         return productResponse.Id;

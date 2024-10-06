@@ -1,0 +1,34 @@
+@model CreateProductViewModel
+
+@{
+    ViewBag.Title = "Create new product";
+}
+
+
+<div class="container">
+    <h2 class="mb-4">Create new product</h2>
+    <form asp-controller="Products" asp-action="Create" method="post">
+        <div class="mb-3">
+            <label class="form-label" asp-for="Name"></label>
+            <input class="form-control" asp-for="Name"/>
+            <span class="text-danger" asp-validation-for="Name"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" asp-for="Description"></label>
+            <textarea class="form-control" asp-for="Description" cols="3"></textarea>
+            <span class="text-danger" asp-validation-for="Description"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" asp-for="Price"></label>
+            <input class="form-control" type="number" asp-for="Price"/>
+            <span class="text-danger" asp-validation-for="Price"></span>
+        </div>
+
+        <div class="mb-3">
+            <button class="btn btn-success" type="submit">Create</button>
+        </div>
+    </form>
+</div>
+

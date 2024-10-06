@@ -6,6 +6,7 @@ using ProductsService.Mediator.Commands.CreateProductCommand;
 using ProductsService.Mediator.Commands.DeleteProductCommand;
 using ProductsService.Mediator.Commands.UpdateProductCommand;
 using ProductsService.Mediator.Queries.GetProductByIdQuery;
+using ProductsService.Mediator.Queries.GetProductsQuery;
 
 namespace ProductsService.Controllers;
 
@@ -19,6 +20,14 @@ public class ProductsController : ApiController
         _mediator = mediator;
     }
 
+    [HttpGet("products")]
+    public async Task<IActionResult> GetAll()
+    {
+        var query = new GetProductsQuery();
+        var products = await _mediator.Send(query);
+        return Ok(products);
+    }
+    
     [HttpGet("products/{productId:guid}")]
     public async Task<IActionResult> GetById(Guid productId)
     {
@@ -27,22 +36,25 @@ public class ProductsController : ApiController
         return Ok(product);
     }
     
-    [HttpPost("products/create")]
+    [HttpPost("products")]
     public async Task<IActionResult> CreateProduct(CreateProductCommand command)
     {
         var productId = await _mediator.Send(command);
         return CreatedAtAction("GetById", "Products", new { productId }, productId);
     }
 
-    [HttpPut("products/update")]
-    public IActionResult UpdateProduct(UpdateProductCommand command)
+    [HttpPut("products/{productId:guid}")]
+    public async Task<IActionResult> UpdateProduct(Guid productId, UpdateProductCommand command)
     {
-        throw new NotImplementedException();
+        command.Id = productId;
+        await _mediator.Send(command);
+        return Ok(command.Id);
     }
 
-    [HttpDelete("products/delete")]
-    public IActionResult DeleteProduct(DeleteProductCommand command)
+    [HttpDelete("products/{productId:guid}")]
+    public async Task<IActionResult> DeleteProduct(Guid productId)
     {
-        throw new NotImplementedException();
+        await _mediator.Send(new DeleteProductCommand(productId));
+        return NoContent();
     }
 }

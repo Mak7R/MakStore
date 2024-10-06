@@ -18,13 +18,14 @@ public class AccountController : Controller
     }
     
     [HttpGet("login")]
-    public IActionResult Login()
+    public IActionResult Login([FromQuery] string? returnUrl = null)
     {
+        ViewBag.ReturnUrl = returnUrl;
         return View();
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginViewModel loginViewModel)
+    public async Task<IActionResult> Login(LoginViewModel loginViewModel, [FromQuery] string? returnUrl = null)
     {
         if (!ModelState.IsValid)
             return View(loginViewModel);
@@ -58,8 +59,10 @@ public class AccountController : Controller
         
         Response.Cookies.Append("AccessToken", authResponse.AccessToken, cookieOptions);
         Response.Cookies.Append("RefreshToken", authResponse.RefreshToken, cookieOptions);
-        
-        return RedirectToAction("Index", "Home");
+
+        if (string.IsNullOrEmpty(returnUrl))
+            return RedirectToAction("Index", "Home");
+        return LocalRedirect(returnUrl);
     }
 
     [HttpGet("logout")]

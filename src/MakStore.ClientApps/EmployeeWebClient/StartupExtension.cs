@@ -1,3 +1,7 @@
+using System.Net;
+using EmployeeWebClient.Configuration.Options;
+using EmployeeWebClient.Middlewares;
+using EmployeeWebClient.Services;
 using MakStore.SharedComponents.Authentication;
 using MakStore.SharedComponents.Authentication.Options;
 using MakStore.SharedComponents.Exceptions;
@@ -25,10 +29,13 @@ public static class StartupExtension
                         .Get<MicroservicesAuthenticationOptions>()?.ValidateAccessTokenUrl ?? throw new InvalidOperationException("ValidateAccessTokenUrl is required");
                     opt.AccessTokenProvider = context => context.Request.Cookies["AccessToken"];
                 });
-    
+
+        builder.Services.Configure<ServicesOptions>(builder.Configuration.GetSection("Services"));
 
         builder.Services.AddAuthorization();
 
+        builder.Services.AddScoped<IProductsService, ProductsService>();
+        
         return builder;
     }
 
@@ -41,7 +48,7 @@ public static class StartupExtension
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseExceptionHandlingMiddleware();
+        
         if (!app.Environment.IsDevelopment())
         {
             app.UseHttpsRedirection();
@@ -50,6 +57,8 @@ public static class StartupExtension
             app.UseHsts();
         }
 
+        
+        app.UseMvcExceptionHandlingMiddleware();
         app.UseSerilogRequestLogging();
 
         app.UseStaticFiles();

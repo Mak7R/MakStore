@@ -1,0 +1,29 @@
+@model IEnumerable<ProductViewModel>
+
+@{
+    ViewBag.Title = "Products";
+}
+
+<div class="container"> 
+    <h2 class="text-center mb-5">Products</h2>
+    
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var product in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <a class="card-title fs-5" asp-controller="Products" asp-action="GetById" asp-route-productId="@product.Id">@product.Name</a>
+                        <small class="text-muted" style="position: absolute; top: 10px; right: 10px;">@product.Id</small>
+                        <p class="card-text">@product.Description</p>
+                        <img src="https://via.placeholder.com/300" class="card-img-top" alt="Product Image">
+                    </div>
+                    
+                    <div class="card-footer">
+                        <p class="text-muted"><strong>Price:</strong> $@product.Price</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

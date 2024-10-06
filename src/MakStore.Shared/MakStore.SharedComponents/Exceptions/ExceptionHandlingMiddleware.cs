@@ -51,7 +51,11 @@ public class ExceptionHandlingMiddleware
             Title = "Invalid request data",
             Detail = "One or more fields contain invalid values. Please correct the highlighted errors and try again.",
             Instance = context.Request.Path,
-            Errors = exception.Errors
+            Errors = exception.Errors,
+            Extensions = new Dictionary<string, object?>
+            {
+                {"errors", exception.Errors}
+            }
         };
         
         return WriteResponseAsync(context, details);
