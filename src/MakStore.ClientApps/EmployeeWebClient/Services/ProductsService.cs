@@ -17,19 +17,18 @@ public class ProductsService : IProductsService
         _httpClientFactory = httpClientFactory;
         _options = options.Value;
     }
-
+    
     public async Task<IEnumerable<ProductViewModel>> GetAll()
     {
-        using var client = _httpClientFactory.CreateClient();
+        var client = _httpClientFactory.CreateClient("apiClient");
         var products = await client.GetFromJsonAsync<IEnumerable<ProductViewModel>>($"{_options.ProductsService.BaseUrl}/products") ?? [];
         return products;
     }
-
+    
     public async Task<ProductViewModel?> GetById(Guid productId)
     {
-        using var client = _httpClientFactory.CreateClient();
-        var product =
-            await client.GetFromJsonAsync<ProductViewModel>($"{_options.ProductsService.BaseUrl}/products/{productId}");
+        var client = _httpClientFactory.CreateClient("apiClient");
+        var product = await client.GetFromJsonAsync<ProductViewModel>($"{_options.ProductsService.BaseUrl}/products/{productId}");
         return product;
     }
 
@@ -39,7 +38,7 @@ public class ProductsService : IProductsService
     };
     public async Task<OperationResult<Guid>> Create(CreateProductViewModel product)
     {
-        using var client = _httpClientFactory.CreateClient();
+        var client = _httpClientFactory.CreateClient("apiClient");
         var request = new HttpRequestMessage(HttpMethod.Post, $"{_options.ProductsService.BaseUrl}/products");
         request.Content = new StringContent(
             JsonSerializer.Serialize(product),
@@ -63,7 +62,7 @@ public class ProductsService : IProductsService
 
     public async Task<OperationResult> Update(Guid productId, UpdateProductViewModel product)
     {
-        using var client = _httpClientFactory.CreateClient();
+        var client = _httpClientFactory.CreateClient("apiClient");
         var request = new HttpRequestMessage(HttpMethod.Put, $"{_options.ProductsService.BaseUrl}/products/{productId}");
         request.Content = new StringContent(
             JsonSerializer.Serialize(product),
@@ -83,7 +82,7 @@ public class ProductsService : IProductsService
 
     public async Task<OperationResult> Delete(Guid productId, DeleteProductViewModel product)
     {
-        using var client = _httpClientFactory.CreateClient();
+        var client = _httpClientFactory.CreateClient("apiClient");
         var request = new HttpRequestMessage(HttpMethod.Delete, $"{_options.ProductsService.BaseUrl}/products/{productId}");
         request.Content = new StringContent(
             JsonSerializer.Serialize(product),

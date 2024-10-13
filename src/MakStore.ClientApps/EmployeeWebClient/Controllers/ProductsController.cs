@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeWebClient.Controllers;
 
-[Authorize]
+
 [Controller]
 [Route("products")]
 public class ProductsController : Controller
@@ -25,18 +25,21 @@ public class ProductsController : Controller
         return View(await _productsService.GetAll());
     }
 
+    [AllowAnonymous]
     [HttpGet("{productId:guid}")]
     public async Task<IActionResult> GetById(Guid productId)
     {
         return View(await _productsService.GetById(productId));
     }
     
+    [Authorize(Roles = "Admin")]
     [HttpGet("create")]
     public IActionResult Create()
     {
         return View();
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("create")]
     public async Task<IActionResult> Create(CreateProductViewModel product)
     {
@@ -53,6 +56,7 @@ public class ProductsController : Controller
         return View(product);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{productId:guid}/update")]
     public async Task<IActionResult> Update(Guid productId)
     {
@@ -60,13 +64,13 @@ public class ProductsController : Controller
         
         return View(new UpdateProductViewModel
         {
-            Name = product.Name,
-            Description = product.Description,
-            Price = product.Price
+            Name = product?.Name ?? string.Empty,
+            Description = product?.Description,
+            Price = product?.Price ?? 0
         });
     }
 
-    
+    [Authorize(Roles = "Admin")]
     [HttpPost("{productId:guid}/update")]
     public async Task<IActionResult> Update(Guid productId, UpdateProductViewModel product)
     {
@@ -83,6 +87,7 @@ public class ProductsController : Controller
         return View(product);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("{productId:guid}/delete")]
     public async Task<IActionResult> Delete(Guid productId)
     {

@@ -47,9 +47,11 @@ public static class StartupExtension
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-
-        app.UseHttpsRedirection();
-
+        else
+        {
+            app.UseHttpsRedirection();
+        }
+        
         app.UseRouting();
 
         app.UseAuthentication();

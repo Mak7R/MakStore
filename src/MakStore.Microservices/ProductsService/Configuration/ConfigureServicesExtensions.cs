@@ -1,8 +1,10 @@
 using Asp.Versioning;
 using FluentValidation;
-using MakStore.SharedComponents.Authentication;
-using MakStore.SharedComponents.Authentication.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ProductsService.Data;
 using ProductsService.Infrastructure.Repositories;
@@ -15,23 +17,27 @@ public static class ConfigureServicesExtensions
     {
         services.AddControllers();
         services.AddHttpClient();
-        services.AddAuthentication()
-            .AddMicroservicesAuthentication(options =>
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                options.ValidateAccessTokenUrl = configuration.GetSection("Authentication")
-                    .Get<MicroservicesAuthenticationOptions>()?.ValidateAccessTokenUrl ?? throw new InvalidOperationException("ValidateAccessTokenUrl is required");
-                options.AccessTokenProvider = context =>
+                options.Authority = "https://host.docker.internal:9011";
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-
-                    var minLength = "Bearer ".Length;
-                    
-                    if (authHeader == null || authHeader.Length < minLength) return null;
-
-                    return authHeader.Substring(minLength);
+                    ValidateAudience = false
                 };
             });
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("ProductsApiPolicy", b =>
+            {
+                b.Requirements.Add(new ClaimsAuthorizationRequirement("scope", ["products_api"]));
+            });
+        });
+        
+        services.AddControllers(options =>
+        {
+            options.Filters.Add(new AuthorizeFilter("ProductsApiPolicy"));
+        });
     }
     
     public static void ConfigureApi(this IServiceCollection services, IConfiguration configuration)

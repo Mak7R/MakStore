@@ -1,7 +1,17 @@
-using AuthService.Configuration;
+using System.Net;
+using Asp.Versioning;
 using AuthService.Data;
+using AuthService.Identity;
+using AuthService.Interfaces;
+using AuthService.Middlewares;
+using AuthService.Services;
 using MakStore.SharedComponents.Exceptions;
 using MakStore.SharedComponents.Logging;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Serilog;
 
 namespace AuthService;
@@ -10,28 +20,162 @@ public static class StartupExtension
 {
     public static WebApplicationBuilder ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.UseSerilog();
-        
         var services = builder.Services;
         var configuration = builder.Configuration;
         var env = builder.Environment;
+        
+        builder.UseSerilog();
 
-        services.ConfigureOptions(configuration);
-        services.ConfigureDefaultServices(configuration);
-        services.ConfigureInfrastructure(configuration);
-        services.ConfigureApi(configuration);
+        #region InfrastructureConfiguration
+        
+        var defaultConnection = configuration.GetConnectionString("DefaultConnection") ??
+                                 throw new ConfigurationException("Connection string 'DefaultConnection' was not found.");
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql(defaultConnection));
+
+        services.AddIdentity<ApplicationUser, ApplicationRole>(opt =>
+            {
+                opt.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+                opt.User.RequireUniqueEmail = true;
+
+                opt.Password.RequiredLength = 4;
+                opt.Password.RequireDigit = false;
+                opt.Password.RequireLowercase = false;
+                opt.Password.RequireUppercase = false;
+                opt.Password.RequireNonAlphanumeric = false;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+        
+        services.AddScoped<IAdminTokenProvider, AdminTokenProvider>();
+
+        #endregion
+        
+        #region BaseServicesConfiguration
+
+        services.AddControllersWithViews();
+        services.AddHttpClient();
+
+        services.ConfigureApplicationCookie(options => // !!! important: should be executed after add identity because it overrides cookies options
+        {
+            options.Events.OnRedirectToLogin = async context =>
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                context.Response.ContentType = "application/json";
+
+                await context.Response.WriteAsJsonAsync(new ProblemDetails
+                {
+                    Status = (int)HttpStatusCode.Unauthorized,
+                    Title = "Unauthorized",
+                    Detail = "You do not have permission to access this resource.",
+                    Instance = context.Request.Path,
+                });
+            };
+            options.Events.OnRedirectToAccessDenied = async context =>
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                context.Response.ContentType = "application/json";
+
+                await context.Response.WriteAsJsonAsync(new ProblemDetails
+                {
+                    Status = (int)HttpStatusCode.Forbidden,
+                    Title = "Access Denied",
+                    Detail = "You do not have permission to access this resource.",
+                    Instance = context.Request.Path,
+                });
+            };
+        });
+        services.AddAuthentication();
+        services.AddAuthorization();
+
+        #endregion
+        
+        #region ApiConfiguration
+
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      \r\n\r\nExample: 'Bearer 12345abcdef'",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        },
+                        Scheme = "oauth2",
+                        Name = "Bearer",
+                        In = ParameterLocation.Header
+                    },
+                    new List<string>()
+                }
+            });
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "WebGames API V1", Version = "1.0" });
+        });
+        
+        services.AddApiVersioning(config =>
+            {
+                config.ApiVersionReader = new UrlSegmentApiVersionReader();
+                config.DefaultApiVersion = new ApiVersion(1, 0);
+                config.AssumeDefaultVersionWhenUnspecified = true;
+            })
+            .AddApiExplorer(opt =>
+            {
+                opt.GroupNameFormat = "'v'VVV";
+                opt.SubstituteApiVersionInUrl = true;
+            });
+
+        #endregion
+
+        #region IdentityServer
+        
+        builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/DataProtection-Keys"));
+
+        var identityServerDbConnectionString = configuration.GetConnectionString("IdentityServerDb")
+                                               ?? throw new ConfigurationException("Connection string 'IdentityServerDb' was not found.");
+        
+        builder.Services.AddIdentityServer()
+            .AddConfigurationStore(options =>
+            {
+                options.ConfigureDbContext = b => b.UseNpgsql(identityServerDbConnectionString, 
+                    sql => sql.MigrationsAssembly(typeof(Program).Assembly.GetName().Name));
+            })
+            .AddOperationalStore(options =>
+            {
+                options.ConfigureDbContext = b => b.UseNpgsql(identityServerDbConnectionString, 
+                    sql => sql.MigrationsAssembly(typeof(Program).Assembly.GetName().Name));
+            })
+            //.AddInMemoryApiScopes(IdentityServerConfig.ApiScopes)
+            //.AddInMemoryIdentityResources(IdentityServerConfig.IdentityResources)
+            //.AddInMemoryClients(IdentityServerConfig.Clients)
+            .AddAspNetIdentity<ApplicationUser>();
+
+        #endregion
         
         return builder;
     }
 
-    private static void InitializeApp(this IServiceProvider services)
+    public static WebApplication InitializeApp(this WebApplication app)
     {
-        using var scope = services.CreateScope();
+        using var scope = app.Services.CreateScope();
 
         try
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            dbContext.Initialize();
+            dbContext.Initialize(scope.ServiceProvider);
         }
         catch (Exception e)
         {
@@ -39,16 +183,13 @@ public static class StartupExtension
             var logger = loggerFactory.CreateLogger<ApplicationDbContext>();
             logger.LogError(e, "An exception was thrown while initializing database");
         }
+
+        return app;
     }
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        var services = app.Services;
-        var configuration = app.Configuration;
-        var env = app.Environment;
-
-        services.InitializeApp();
-        app.UseExceptionHandlingMiddleware();
+        app.UseMvcExceptionHandlingMiddleware();
         app.UseSerilogRequestLogging();
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -62,13 +203,17 @@ public static class StartupExtension
             app.UseHsts();
             app.UseHttpsRedirection();
         }
-        
+
+        app.UseIdentityServer();
+
+        app.UseStaticFiles();
         app.UseRouting();
-        
+
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
-        
+
         return app;
     }
 }

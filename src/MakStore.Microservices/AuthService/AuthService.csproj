@@ -8,35 +8,35 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.8.1" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.8.1" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Content Include="..\..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Data\Migrations\" />
+      <PackageReference Include="Duende.IdentityServer" Version="7.0.7" />
+      <PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="7.0.7" />
+      <PackageReference Include="Duende.IdentityServer.EntityFramework" Version="7.0.7" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.8.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.8.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\MakStore.Shared\MakStore.SharedComponents\MakStore.SharedComponents.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Views\Shared\Error.cshtml" />
+      <AdditionalFiles Include="Views\Shared\_Layout.cshtml" />
+      <AdditionalFiles Include="Views\Shared\_ValidationScriptsPartial.cshtml" />
     </ItemGroup>
 
 </Project>

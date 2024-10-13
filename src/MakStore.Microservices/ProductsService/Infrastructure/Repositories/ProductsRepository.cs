@@ -15,7 +15,7 @@ public class ProductsRepository : Repository<ProductsDbContext, Product, Guid>, 
     {
         try
         {
-            return await DbContext.Products.FirstOrDefaultAsync(p => p.Name == name, cancellationToken: cancellationToken);
+            return await DbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Name == name, cancellationToken: cancellationToken);
         }
         catch (Exception e)
         {

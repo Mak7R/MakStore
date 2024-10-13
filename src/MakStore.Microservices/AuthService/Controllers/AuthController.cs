@@ -1,8 +1,8 @@
 using Asp.Versioning;
 using AuthService.Identity;
-using AuthService.Interfaces;
-using AuthService.Models.Auth;
+using AuthService.Models.Account;
 using MakStore.SharedComponents.Api;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,49 +13,20 @@ namespace AuthService.Controllers;
 public class AuthController : ApiController
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IAuthTokenService<ApplicationUser> _tokenService;
 
-    public AuthController(UserManager<ApplicationUser> userManager, IAuthTokenService<ApplicationUser> tokenService)
+    public AuthController(UserManager<ApplicationUser> userManager)
     {
         _userManager = userManager;
-        _tokenService = tokenService;
     }
-
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginViewModel viewModel)
+    
+    [HttpPost("register/admin")]
+    public async Task<IActionResult> RegisterAdmin(RegisterViewModel viewModel, string adminToken)
     {
-        var user = await _userManager.FindByNameAsync(viewModel.UserName);
-        if (user == null)
-        {
-            ModelState.AddModelError(nameof(LoginViewModel.UserName), "User with this username was not found");
-            return ValidationProblem(ModelState);
-        }
-
-        var isPasswordValid = await _userManager.CheckPasswordAsync(user, viewModel.Password);
-        if (!isPasswordValid)
-        {
-            ModelState.AddModelError(nameof(LoginViewModel.UserName), "Invalid username or password");
-            ModelState.AddModelError(nameof(LoginViewModel.Password), "Invalid username or password");
-            return ValidationProblem(ModelState);
-        }
-
-        var accessToken = await _tokenService.GetAccessTokenAsync(user);
-        var refreshToken = await _tokenService.SaveRefreshTokenAsync(user);
+        // todo validateAdminToken
         
-        return Ok(new
-        {
-            UserId = user.Id,
-            AccessToken = accessToken,
-            RefreshToken = refreshToken
-        });
-    }
-
-    [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterViewModel viewModel)
-    {
         var user = new ApplicationUser
         {
-            UserName = viewModel.UserName,
+            UserName = viewModel.Username,
             Email = viewModel.Email
         };
 
@@ -71,54 +42,35 @@ public class AuthController : ApiController
             return ValidationProblem(ModelState);
         }
 
+        await _userManager.AddToRoleAsync(user, nameof(UserRole.Admin));
+        
         return Ok(user.Id);
     }
-
-    [HttpGet("validate")]
-    public async Task<IActionResult> Validate([FromQuery] ValidateTokenRequestViewModel viewModel)
+    
+    [Authorize(Roles = "Admin")]
+    [HttpPost("register/employee")]
+    public async Task<IActionResult> RegisterEmployee(RegisterViewModel viewModel)
     {
-        return Ok(await _tokenService.ValidateAccessTokenAsync(viewModel.Token));
-    }
-
-    [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken(RefreshTokenRequestViewModel viewModel)
-    {
-        var user = await _userManager.FindByIdAsync(viewModel.UserId.ToString());
-        if (user == null)
+        var user = new ApplicationUser
         {
-            ModelState.AddModelError(nameof(viewModel.UserId), "User with this id was not found");
+            UserName = viewModel.Username,
+            Email = viewModel.Email
+        };
+
+        var result = await _userManager.CreateAsync(user, viewModel.Password);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("Model", error.Description);
+            }
+
             return ValidationProblem(ModelState);
         }
 
-        var isValid = await _tokenService.ValidateRefreshTokenAsync(user, viewModel.RefreshToken);
-        if (!isValid)
-        {
-            ModelState.AddModelError(nameof(viewModel.RefreshToken), "Refresh token is not valid");
-            return ValidationProblem(ModelState);
-        }
-
-        var refreshToken = await _tokenService.SaveRefreshTokenAsync(user);
-        var accessToken = await _tokenService.GetAccessTokenAsync(user);
-
-        return Ok(new
-        {
-            UserId = user.Id,
-            AccessToken = accessToken,
-            RefreshToken = refreshToken
-        });
-    }
-
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout(LogoutViewModel viewModel)
-    {
-        var user = await _userManager.FindByIdAsync(viewModel.UserId.ToString());
-        if (user == null)
-        {
-            ModelState.AddModelError(nameof(viewModel.UserId), "User with this id was not found");
-            return ValidationProblem(ModelState);
-        }
-
-        await _tokenService.RemoveRefreshTokenAsync(user, viewModel.RefreshToken);
+        await _userManager.AddToRoleAsync(user, nameof(UserRole.Employee));
+        
         return Ok(user.Id);
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.Data;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -20,10 +20,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationUserConfiguration).Assembly);
         builder.Entity<ApplicationUser>(opt => opt.ToTable("Users"));
         builder.Entity<ApplicationRole>(opt => opt.ToTable("Roles"));
-        builder.Entity<IdentityUserClaim<Guid>>(opt => opt.ToTable("UserClaims"));
-        builder.Entity<IdentityUserRole<Guid>>(opt => opt.ToTable("UserRoles"));
-        builder.Entity<IdentityUserLogin<Guid>>(opt => opt.ToTable("UserLogins"));
-        builder.Entity<IdentityRoleClaim<Guid>>(opt => opt.ToTable("RoleClaims"));
-        builder.Entity<IdentityUserToken<Guid>>(opt => opt.ToTable("UserTokens"));
+        builder.Entity<IdentityUserClaim<string>>(opt => opt.ToTable("UserClaims"));
+        builder.Entity<IdentityUserRole<string>>(opt => opt.ToTable("UserRoles"));
+        builder.Entity<IdentityUserLogin<string>>(opt => opt.ToTable("UserLogins"));
+        builder.Entity<IdentityRoleClaim<string>>(opt => opt.ToTable("RoleClaims"));
+        builder.Entity<IdentityUserToken<string>>(opt => opt.ToTable("UserTokens"));
     }
 }

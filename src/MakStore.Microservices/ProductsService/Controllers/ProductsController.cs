@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using MakStore.SharedComponents.Api;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductsService.Mediator.Commands.CreateProductCommand;
 using ProductsService.Mediator.Commands.DeleteProductCommand;
@@ -20,6 +21,7 @@ public class ProductsController : ApiController
         _mediator = mediator;
     }
 
+    [AllowAnonymous]
     [HttpGet("products")]
     public async Task<IActionResult> GetAll()
     {
@@ -28,6 +30,7 @@ public class ProductsController : ApiController
         return Ok(products);
     }
     
+    [AllowAnonymous]
     [HttpGet("products/{productId:guid}")]
     public async Task<IActionResult> GetById(Guid productId)
     {
@@ -36,6 +39,7 @@ public class ProductsController : ApiController
         return Ok(product);
     }
     
+    [Authorize(Roles = "Admin")]
     [HttpPost("products")]
     public async Task<IActionResult> CreateProduct(CreateProductCommand command)
     {
@@ -43,6 +47,7 @@ public class ProductsController : ApiController
         return CreatedAtAction("GetById", "Products", new { productId }, productId);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("products/{productId:guid}")]
     public async Task<IActionResult> UpdateProduct(Guid productId, UpdateProductCommand command)
     {
@@ -51,6 +56,7 @@ public class ProductsController : ApiController
         return Ok(command.Id);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("products/{productId:guid}")]
     public async Task<IActionResult> DeleteProduct(Guid productId)
     {

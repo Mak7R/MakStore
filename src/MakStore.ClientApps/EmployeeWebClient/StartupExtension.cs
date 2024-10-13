@@ -1,11 +1,12 @@
-using System.Net;
+using System.Security.Claims;
 using EmployeeWebClient.Configuration.Options;
 using EmployeeWebClient.Middlewares;
 using EmployeeWebClient.Services;
-using MakStore.SharedComponents.Authentication;
-using MakStore.SharedComponents.Authentication.Options;
-using MakStore.SharedComponents.Exceptions;
+using IdentityModel;
 using MakStore.SharedComponents.Logging;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Serilog;
 
 namespace EmployeeWebClient;
@@ -18,17 +19,53 @@ public static class StartupExtension
         
         builder.Services.AddControllersWithViews();
         builder.Services.AddHttpClient();
+        builder.Services.AddHttpContextAccessor();
 
-        builder.Services.Configure<MicroservicesAuthenticationOptions>(builder.Configuration.GetSection("Authentication"));
 
-        builder.Services.AddAuthentication(MicroservicesAuthenticationDefaults.AuthenticationScheme)
-            .AddScheme<MicroservicesAuthenticationOptions, MicroservicesAuthenticationHandler>(MicroservicesAuthenticationDefaults.AuthenticationScheme,
-                opt =>
-                {
-                    opt.ValidateAccessTokenUrl = builder.Configuration.GetSection("Authentication")
-                        .Get<MicroservicesAuthenticationOptions>()?.ValidateAccessTokenUrl ?? throw new InvalidOperationException("ValidateAccessTokenUrl is required");
-                    opt.AccessTokenProvider = context => context.Request.Cookies["AccessToken"];
-                });
+        builder.Services.AddUserAccessTokenHttpClient("apiClient", configureClient: client =>
+        {
+            client.BaseAddress = new Uri("http://localhost:9002");
+        });
+        builder.Services.AddOpenIdConnectAccessTokenManagement();
+        builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = "oidc";
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddCookie(options =>
+            {
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.HttpOnly = true;
+            })
+            .AddOpenIdConnect("oidc",options =>
+            {
+                options.Authority = "https://host.docker.internal:9011";
+                
+                options.ClientId = "EmployeesWebClient";
+                options.ClientSecret = "secret";
+                options.ResponseType = OpenIdConnectResponseType.Code;
+                
+                options.Scope.Clear();
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("email");
+                
+                options.Scope.Add("offline_access");
+                
+                options.Scope.Add("products_api");
+                options.Scope.Add("role");
+                options.ClaimActions.MapJsonKey(ClaimTypes.Role, JwtClaimTypes.Role);
+                
+                options.GetClaimsFromUserInfoEndpoint = true;
+
+                options.MapInboundClaims = false;
+                options.DisableTelemetry = true;
+
+                options.SaveTokens = true;
+            });
+            
 
         builder.Services.Configure<ServicesOptions>(builder.Configuration.GetSection("Services"));
 
@@ -64,7 +101,6 @@ public static class StartupExtension
         app.UseStaticFiles();
 
         app.UseRouting();
-
         app.UseAuthentication();
         app.UseAuthorization();
 

@@ -16,17 +16,25 @@ services:
     networks:
       - makstore_net
   
-  # Microservices
+  # Microservices  
   auth_service.makstore:
     container_name: auth_service.makstore
     build:
       context: .
       dockerfile: src/MakStore.Microservices/AuthService/Dockerfile
     environment:
-      - ActiveConnection=DockerDatabase
+      - ConnectionStrings__DefaultConnection=Host=main_db.makstore;Username=rootuser;Password=DbPass20190502;Database=users_db
+      - ConnectionStrings__IdentityServerDb=Host=main_db.makstore;Username=rootuser;Password=DbPass20190502;Database=identity_server_cfg_db
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=sslpassword
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/hostdockerinternal.pfx
+    volumes:
+      - ./DataProtection-Keys:/DataProtection-Keys
+      - ./https:/https
     ports:
-      - "9004:8080"
+      - "9010:80"
+      - "9011:443"
     depends_on:
       - main_db
     networks:
@@ -37,6 +45,8 @@ services:
     build:
       context: .
       dockerfile: src/MakStore.Microservices/ProductsService/Dockerfile
+      args:
+        CERT_PATH: ./https/hostdockerinternal.crt
     environment:
       - ActiveConnection=DockerDatabase
       - ASPNETCORE_ENVIRONMENT=Development
@@ -53,6 +63,8 @@ services:
     build:
       context: .
       dockerfile: src/MakStore.ClientApps/EmployeeWebClient/Dockerfile
+      args:
+        CERT_PATH: ./https/hostdockerinternal.crt
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:

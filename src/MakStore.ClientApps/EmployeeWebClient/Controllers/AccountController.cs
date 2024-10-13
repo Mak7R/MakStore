@@ -1,7 +1,5 @@
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using EmployeeWebClient.Models.Account;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeWebClient.Controllers;
@@ -10,74 +8,20 @@ namespace EmployeeWebClient.Controllers;
 [Route("account")]
 public class AccountController : Controller
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public AccountController(IHttpClientFactory httpClientFactory)
+    public AccountController()
     {
-        _httpClientFactory = httpClientFactory;
     }
     
     [HttpGet("login")]
-    public IActionResult Login([FromQuery] string? returnUrl = null)
+    public IActionResult Login(string? returnUrl)
     {
-        ViewBag.ReturnUrl = returnUrl;
-        return View();
-    }
-
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginViewModel loginViewModel, [FromQuery] string? returnUrl = null)
-    {
-        if (!ModelState.IsValid)
-            return View(loginViewModel);
-        
-        using var httpClient = _httpClientFactory.CreateClient();
-    
-        var requestContent = new StringContent(JsonSerializer.Serialize(new
-        {
-            loginViewModel.Username,
-            loginViewModel.Password
-        }), Encoding.UTF8, "application/json");
-        
-        var response = await httpClient.PostAsync("http://auth_service.makstore:8080/api/v1/login", requestContent);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            // Обработка ошибки авторизации
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-            return View(loginViewModel);
-        }
-        
-        var responseBody = await response.Content.ReadAsStringAsync();
-        var authResponse = JsonSerializer.Deserialize<AuthResponse>(responseBody);
-        
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = false,
-            Expires = DateTime.UtcNow.AddDays(7)
-        };
-        
-        Response.Cookies.Append("AccessToken", authResponse.AccessToken, cookieOptions);
-        Response.Cookies.Append("RefreshToken", authResponse.RefreshToken, cookieOptions);
-
-        if (string.IsNullOrEmpty(returnUrl))
-            return RedirectToAction("Index", "Home");
-        return LocalRedirect(returnUrl);
+        var redirectUri = string.IsNullOrEmpty(returnUrl) ? "/" : new Uri(returnUrl).IsAbsoluteUri ? "/" : returnUrl;
+        return Challenge(new AuthenticationProperties { RedirectUri = redirectUri }, "oidc");
     }
 
     [HttpGet("logout")]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete("AccessToken");
-        Response.Cookies.Delete("RefreshToken");
-        
-        return RedirectToAction("Index", "Home");
+        return SignOut(CookieAuthenticationDefaults.AuthenticationScheme, "oidc");
     }
-    
-    
-    private record AuthResponse(
-        [property: JsonPropertyName("userId")] string UserId,
-        [property: JsonPropertyName("accessToken")] string AccessToken, 
-        [property: JsonPropertyName("refreshToken")] string RefreshToken
-        );
 }
