@@ -1,6 +1,7 @@
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using IdentityModel;
+using MakStore.SharedComponents.Constants;
 
 namespace AuthService.Configuration;
 
@@ -23,7 +24,7 @@ public static class IdentityServerConfig
 
     public static IEnumerable<ApiScope> ApiScopes => new[]
     {
-        new ApiScope(name: "products_api", displayName: "Products API", userClaims: new []{JwtClaimTypes.Email, JwtClaimTypes.Name, JwtClaimTypes.Role})
+        new ApiScope(name: MicroservicesConstants.ApiDefaults.ProductsApi, displayName: "Products API", userClaims: new []{JwtClaimTypes.Email, JwtClaimTypes.Name, JwtClaimTypes.Role})
     };
 
     public static IEnumerable<Client> Clients => new[]
@@ -33,7 +34,7 @@ public static class IdentityServerConfig
             ClientId = "client",
             AllowedGrantTypes = GrantTypes.ClientCredentials,
             ClientSecrets = { new Secret("secret".Sha256()) },
-            AllowedScopes = { "products_api" }
+            AllowedScopes = { MicroservicesConstants.ApiDefaults.ProductsApi }
         },
         new Client
         {
@@ -53,7 +54,7 @@ public static class IdentityServerConfig
                 IdentityServerConstants.StandardScopes.OpenId,
                 IdentityServerConstants.StandardScopes.Profile,
                 IdentityServerConstants.StandardScopes.Email,
-                "products_api",
+                MicroservicesConstants.ApiDefaults.ProductsApi,
                 "role"
             }
         }

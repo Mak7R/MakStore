@@ -3,6 +3,7 @@ using EmployeeWebClient.Configuration.Options;
 using EmployeeWebClient.Middlewares;
 using EmployeeWebClient.Services;
 using IdentityModel;
+using MakStore.SharedComponents.Constants;
 using MakStore.SharedComponents.Logging;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -48,13 +49,12 @@ public static class StartupExtension
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 
                 options.Scope.Clear();
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
-                options.Scope.Add("email");
+                options.Scope.Add(OidcConstants.StandardScopes.OpenId); 
+                options.Scope.Add(OidcConstants.StandardScopes.Profile);
+                options.Scope.Add(OidcConstants.StandardScopes.Email);
+                options.Scope.Add(OidcConstants.StandardScopes.OfflineAccess);
                 
-                options.Scope.Add("offline_access");
-                
-                options.Scope.Add("products_api");
+                options.Scope.Add(MicroservicesConstants.ApiDefaults.ProductsApi);
                 options.Scope.Add("role");
                 options.ClaimActions.MapJsonKey(ClaimTypes.Role, JwtClaimTypes.Role);
                 
@@ -93,7 +93,6 @@ public static class StartupExtension
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
-
         
         app.UseMvcExceptionHandlingMiddleware();
         app.UseSerilogRequestLogging();

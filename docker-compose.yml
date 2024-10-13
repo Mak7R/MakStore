@@ -48,7 +48,7 @@ services:
       args:
         CERT_PATH: ./https/hostdockerinternal.crt
     environment:
-      - ActiveConnection=DockerDatabase
+      - ConnectionStrings__DefaultConnection=Host=main_db.makstore;Username=rootuser;Password=DbPass20190502;Database=products_db
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "9005:8080"

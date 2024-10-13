@@ -25,11 +25,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Auth\" />
-      <Folder Include="Configuration\Extensions\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\MakStore.Shared\MakStore.SharedComponents\MakStore.SharedComponents.csproj" />
     </ItemGroup>
 
