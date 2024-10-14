@@ -1,15 +1,13 @@
-@using AuthService.Identity
-@using Duende.IdentityServer.Extensions
-@model RegisterViewModel
+@model RegisterAdminViewModel
 
 @{
-    ViewBag.Title = "Register";
+    ViewBag.Title = "Register admin";
 }
 
 <div class="container">
-    Register
+    <h2 class="text-center">Register Admin</h2>
     
-    <form id="registerForm" asp-controller="Account" asp-action="RegisterClient" method="post">
+    <form asp-controller="Account" asp-action="RegisterAdmin" method="post">
         <input asp-for="ReturnUrl" hidden/>
 
         <div class="mb-2">
@@ -31,22 +29,14 @@
         </div>
 
         <div class="mb-2">
+            <label asp-for="AdminToken" class="form-label"></label>
+            <input asp-for="AdminToken" class="form-control"/>
+            <span asp-validation-for="AdminToken" class="text-danger"></span>
+        </div>
+
+        <div class="mb-2">
             <a class="btn btn-primary" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@(Model.ReturnUrl ?? string.Empty)">Login</a>
             <button class="btn btn-success" type="submit">Register</button>
-            
-            @if (User.IsAuthenticated() && User.IsInRole(nameof(UserRole.Admin)))
-            {
-                <button class="btn btn-warning" onclick="submitEmployeeRegistration()">Register Employee</button>
-            }
         </div>
     </form>
 </div>
-
-<script>
-    function submitEmployeeRegistration() {
-        // Изменяем действие формы перед отправкой
-        const form = document.getElementById("registerForm");
-        form.action = '@Url.Action("RegisterEmployee", "Account")';
-        form.submit();
-    }
-</script>

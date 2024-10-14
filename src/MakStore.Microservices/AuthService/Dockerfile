@@ -1,8 +1,17 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 80
+EXPOSE 443
+
+# add allowed https certificate
+ARG CERT_PATH=./https/hostdockerinternal.crt
+USER root
+COPY ${CERT_PATH} /usr/local/share/ca-certificates/hostdockerinternal.crt
+
+RUN chmod 644 /usr/local/share/ca-certificates/hostdockerinternal.crt && \
+    update-ca-certificates
+USER $APP_UID
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release

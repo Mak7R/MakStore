@@ -3,10 +3,13 @@ using EmployeeWebClient.Configuration.Options;
 using EmployeeWebClient.Middlewares;
 using EmployeeWebClient.Services;
 using IdentityModel;
+using MakStore.SharedComponents.Configuration;
 using MakStore.SharedComponents.Constants;
+using MakStore.SharedComponents.Exceptions;
 using MakStore.SharedComponents.Logging;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Serilog;
 
@@ -16,22 +19,42 @@ public static class StartupExtension
 {
     public static WebApplicationBuilder ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.UseSerilog();
+        var services = builder.Services;
+        var configuration = builder.Configuration;
         
-        builder.Services.AddControllersWithViews();
-        builder.Services.AddHttpClient();
-        builder.Services.AddHttpContextAccessor();
+        builder.UseSerilog();
 
+        #region ConfigureOptions
 
-        builder.Services.AddUserAccessTokenHttpClient("apiClient", configureClient: client =>
+        var oidcOptionsSection = configuration.GetSection("OidcOptions");
+        var oidcOptions = oidcOptionsSection.Get<OidcOptions>() ?? throw new ConfigurationException("Oidc options was not configured");
+        services.Configure<OidcOptions>(oidcOptionsSection);
+        
+        services.Configure<ServicesOptions>(builder.Configuration.GetSection("Services"));
+        
+        #endregion
+        
+        #region AddDefaultServices
+        
+        services.AddControllersWithViews();
+        services.AddHttpClient();
+        services.AddHttpContextAccessor();
+        services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/DataProtection-Keys"));
+
+        #endregion
+
+        #region AddAuthServices
+
+        services.AddUserAccessTokenHttpClient(AutoAuthHttpClientDefaults.ClientName, configureClient: client =>
         {
-            client.BaseAddress = new Uri("http://localhost:9002");
+            client.BaseAddress = new Uri(configuration["BaseAddress"] ?? throw new ConfigurationException("BaseAddress was not configured"));
         });
-        builder.Services.AddOpenIdConnectAccessTokenManagement();
-        builder.Services.AddAuthentication(options =>
+        services.AddOpenIdConnectAccessTokenManagement();
+        services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = "oidc";
+                options.DefaultChallengeScheme = OidcDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             })
             .AddCookie(options =>
@@ -40,12 +63,12 @@ public static class StartupExtension
                 options.Cookie.SameSite = SameSiteMode.None;
                 options.Cookie.HttpOnly = true;
             })
-            .AddOpenIdConnect("oidc",options =>
+            .AddOpenIdConnect(OidcDefaults.AuthenticationScheme,options =>
             {
-                options.Authority = "https://host.docker.internal:9011";
+                options.Authority = oidcOptions.Authority;
                 
-                options.ClientId = "EmployeesWebClient";
-                options.ClientSecret = "secret";
+                options.ClientId = oidcOptions.ClientId;
+                options.ClientSecret = oidcOptions.ClientSecret;
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 
                 options.Scope.Clear();
@@ -65,13 +88,16 @@ public static class StartupExtension
 
                 options.SaveTokens = true;
             });
-            
+        
+        services.AddAuthorization();
 
-        builder.Services.Configure<ServicesOptions>(builder.Configuration.GetSection("Services"));
+        #endregion
 
-        builder.Services.AddAuthorization();
+        #region AddProjectServices
 
-        builder.Services.AddScoped<IProductsService, ProductsService>();
+        services.AddScoped<IProductsService, ProductsService>();
+
+        #endregion
         
         return builder;
     }

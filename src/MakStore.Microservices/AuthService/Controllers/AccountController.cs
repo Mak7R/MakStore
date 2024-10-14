@@ -1,9 +1,11 @@
 using AuthService.Identity;
+using AuthService.Interfaces;
 using AuthService.Models.Account;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Services;
 using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -126,6 +128,75 @@ public class AccountController : Controller
         await _signInManager.SignInAsync(user, true);
 
         return Redirect(model.ReturnUrl ?? "/");
+    }
+
+    [HttpGet("register-admin")]
+    public IActionResult RegisterAdmin(string? returnUrl)
+    {
+        return View(new RegisterAdminViewModel{ReturnUrl = returnUrl});
+    }
+
+    [HttpPost("register-admin")]
+    public async Task<IActionResult> RegisterAdmin(RegisterAdminViewModel model)
+    {
+        var adminTokenProvider = HttpContext.RequestServices.GetRequiredService<IAdminTokenProvider>();
+
+        if (!await adminTokenProvider.ValidateAsync(model.AdminToken))
+        {
+            ModelState.AddModelError(nameof(model.AdminToken), "Admin token is not valid");
+            return View(model);
+        }
+        
+        var user = new ApplicationUser
+        {
+            UserName = model.Username,
+            Email = model.Email
+        };
+
+        var result = await _userManager.CreateAsync(user, model.Password);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("Model", error.Description);
+            }
+
+            return View(model);
+        }
+
+        await _userManager.AddToRoleAsync(user, nameof(UserRole.Admin));
+        await _signInManager.SignInAsync(user, true);
+
+        return Redirect(model.ReturnUrl ?? "/");
+    }
+
+    
+    [Authorize(Roles = "Admin")]
+    [HttpPost("register-employee")]
+    public async Task<IActionResult> RegisterEmployee(RegisterViewModel model)
+    {
+        var user = new ApplicationUser
+        {
+            UserName = model.Username,
+            Email = model.Email
+        };
+
+        var result = await _userManager.CreateAsync(user, model.Password);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("Model", error.Description);
+            }
+
+            return View("RegisterClient", model);
+        }
+
+        await _userManager.AddToRoleAsync(user, nameof(UserRole.Employee));
+
+        return RedirectToAction("Index");
     }
     
     // todo: read user, update user, update user password, delete user etc 

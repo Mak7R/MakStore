@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AuthService.Models.Account;
 
-public class RegisterViewModel
+public class RegisterAdminViewModel
 {
     [Required]
     public string Username { get; set; } = string.Empty;
@@ -14,6 +14,10 @@ public class RegisterViewModel
     [Required]
     [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
+
+    [Required]
+    [DataType(DataType.Password)]
+    public string AdminToken { get; set; } = string.Empty;
     
     public string? ReturnUrl { get; set; }
 }

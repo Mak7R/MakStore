@@ -45,11 +45,11 @@ services:
     build:
       context: .
       dockerfile: src/MakStore.Microservices/ProductsService/Dockerfile
-      args:
-        CERT_PATH: ./https/hostdockerinternal.crt
     environment:
       - ConnectionStrings__DefaultConnection=Host=main_db.makstore;Username=rootuser;Password=DbPass20190502;Database=products_db
       - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./DataProtection-Keys:/DataProtection-Keys
     ports:
       - "9005:8080"
     depends_on:
@@ -63,10 +63,10 @@ services:
     build:
       context: .
       dockerfile: src/MakStore.ClientApps/EmployeeWebClient/Dockerfile
-      args:
-        CERT_PATH: ./https/hostdockerinternal.crt
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./DataProtection-Keys:/DataProtection-Keys
     ports:
       - "9002:8080"
     depends_on:
@@ -94,6 +94,7 @@ services:
     container_name: api-gateway.makstore
     ports:
       - "9000:80"
+      - "9004:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:

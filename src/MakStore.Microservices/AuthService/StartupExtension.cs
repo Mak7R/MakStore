@@ -1,5 +1,6 @@
 using System.Net;
 using Asp.Versioning;
+using AuthService.Configuration.Options;
 using AuthService.Data;
 using AuthService.Identity;
 using AuthService.Interfaces;
@@ -26,10 +27,19 @@ public static class StartupExtension
         
         builder.UseSerilog();
 
-        #region InfrastructureConfiguration
-        
+        #region ConfigureOptions
+
         var defaultConnection = configuration.GetConnectionString("DefaultConnection") ??
-                                 throw new ConfigurationException("Connection string 'DefaultConnection' was not found.");
+                                throw new ConfigurationException("Connection string 'DefaultConnection' was not found.");
+        var identityServerDbConnectionString = configuration.GetConnectionString("IdentityServerDb")
+                                               ?? throw new ConfigurationException("Connection string 'IdentityServerDb' was not found.");
+
+        services.Configure<AdminTokenOptions>(configuration.GetSection("AdminOptions"));
+        
+        #endregion
+        
+        #region AddInfrastructureServices
+        
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(defaultConnection));
 
@@ -51,12 +61,19 @@ public static class StartupExtension
 
         #endregion
         
-        #region BaseServicesConfiguration
+        #region AddDefaultServices
 
         services.AddControllersWithViews();
         services.AddHttpClient();
+        services.AddHttpContextAccessor();
+        services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/DataProtection-Keys"));
 
-        services.ConfigureApplicationCookie(options => // !!! important: should be executed after add identity because it overrides cookies options
+        #endregion
+
+        #region AddAuthServices
+
+        services.ConfigureApplicationCookie(options => // !!! important: should be executed after AddIdentity because it overrides cookies options
         {
             options.Events.OnRedirectToLogin = async context =>
             {
@@ -90,39 +107,12 @@ public static class StartupExtension
 
         #endregion
         
-        #region ApiConfiguration
+        #region AddApiServices
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
-                      Enter 'Bearer' [space] and then your token in the text input below.
-                      \r\n\r\nExample: 'Bearer 12345abcdef'",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        },
-                        Scheme = "oauth2",
-                        Name = "Bearer",
-                        In = ParameterLocation.Header
-                    },
-                    new List<string>()
-                }
-            });
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "WebGames API V1", Version = "1.0" });
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "MakStore.AuthService API V1", Version = "1.0" });
         });
         
         services.AddApiVersioning(config =>
@@ -141,13 +131,7 @@ public static class StartupExtension
 
         #region IdentityServer
         
-        builder.Services.AddDataProtection()
-            .PersistKeysToFileSystem(new DirectoryInfo("/DataProtection-Keys"));
-
-        var identityServerDbConnectionString = configuration.GetConnectionString("IdentityServerDb")
-                                               ?? throw new ConfigurationException("Connection string 'IdentityServerDb' was not found.");
-        
-        builder.Services.AddIdentityServer()
+        services.AddIdentityServer()
             .AddConfigurationStore(options =>
             {
                 options.ConfigureDbContext = b => b.UseNpgsql(identityServerDbConnectionString, 
@@ -158,9 +142,6 @@ public static class StartupExtension
                 options.ConfigureDbContext = b => b.UseNpgsql(identityServerDbConnectionString, 
                     sql => sql.MigrationsAssembly(typeof(Program).Assembly.GetName().Name));
             })
-            //.AddInMemoryApiScopes(IdentityServerConfig.ApiScopes)
-            //.AddInMemoryIdentityResources(IdentityServerConfig.IdentityResources)
-            //.AddInMemoryClients(IdentityServerConfig.Clients)
             .AddAspNetIdentity<ApplicationUser>();
 
         #endregion
