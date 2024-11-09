@@ -1,0 +1,36 @@
+.button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 15px;
+  border: none;
+  font: inherit;
+  border-radius: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  background-color: #ffc600;
+  color: #000000;
+  text-shadow: 2px 2px 3px #ffc600;
+  box-shadow: 2px 2px 3px #ffc600;
+  transition: all 0.2s ease-in-out;
+}
+
+.button span {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+}
+
+.button:hover {
+  background-color: #000000;
+  color: #ffc600;
+  transform: scale(1.1);
+}
+
+.button:active {
+  transform: scale(0.97);
+}

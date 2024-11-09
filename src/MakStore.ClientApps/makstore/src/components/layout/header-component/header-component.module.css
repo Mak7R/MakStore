@@ -1,0 +1,37 @@
+
+
+.mainHeader{
+  width: 100%;
+  background-color: var(--default-color-blue);
+  padding: 20px;
+}
+
+.headerLinksList{
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+}
+
+.headerLinksListItem{
+  display: inline-block;
+  text-align: center;
+  padding: 5px;
+  margin: 0 20px;
+  transition: transform 0.3s ease;
+}
+
+.headerLinksListItem:hover {
+  transform: scale(1.2);
+}
+
+.headerLink{
+  color: black;
+  text-decoration: none;
+  font-size: var(--fs-md-2);
+  transition: color 0.3s ease;
+}
+
+.headerLink:hover {
+  color: var(--default-color-pink);
+}

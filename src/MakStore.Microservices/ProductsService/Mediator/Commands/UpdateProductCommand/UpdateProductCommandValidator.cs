@@ -11,9 +11,12 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
             .MaximumLength(128);
 
         RuleFor(c => c.Description)
-            .MaximumLength(512);
+            .MaximumLength(1024);
 
         RuleFor(c => c.Price)
             .Must(price => price >= 0);
+        
+        RuleFor(c => c.ResourcesUris)
+            .MaximumLength(512);
     }
 }

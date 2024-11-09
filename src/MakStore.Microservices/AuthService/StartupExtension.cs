@@ -109,6 +109,11 @@ public static class StartupExtension
         
         #region AddApiServices
 
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(b => b.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+        });
+        
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
@@ -170,8 +175,9 @@ public static class StartupExtension
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseMvcExceptionHandlingMiddleware();
         app.UseSerilogRequestLogging();
+        app.UseMvcExceptionHandlingMiddleware();
+        
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
@@ -189,7 +195,7 @@ public static class StartupExtension
 
         app.UseStaticFiles();
         app.UseRouting();
-
+        app.UseCors();
         app.UseAuthentication();
         app.UseAuthorization();
 

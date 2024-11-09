@@ -60,7 +60,8 @@ public static class StartupExtension
                 options.Authority = jwtOidcOptions.Authority;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateAudience = false
+                    ValidateAudience = false,
+                    ValidateLifetime = true
                 };
             });
         services.AddAuthorization(options =>
@@ -75,6 +76,11 @@ public static class StartupExtension
 
         #region AddApiServices
 
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(b => b.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+        });
+        
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
@@ -165,8 +171,9 @@ public static class StartupExtension
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseExceptionHandlingMiddleware();
         app.UseSerilogRequestLogging();
+        app.UseExceptionHandlingMiddleware();
+        
         
         if (app.Environment.IsDevelopment())
         {
@@ -180,6 +187,8 @@ public static class StartupExtension
         
         app.UseRouting();
 
+        app.UseCors();
+        
         app.UseAuthentication();
         app.UseAuthorization();
         

@@ -1,0 +1,35 @@
+.button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 15px;
+  font: inherit;
+  border-radius: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  transition: all 0.3s ease-in-out;
+  border: 1px solid black;
+  box-shadow: 0 0 0 0 black;
+  background-color: white;
+  color: black;
+}
+
+.button span {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+}
+
+.button:hover {
+  transform: translateY(-4px) translateX(-2px);
+  box-shadow: 2px 5px 0 0 black;
+}
+
+.button:active {
+  transform: translateY(2px) translateX(1px);
+  box-shadow: 0 0 0 0 black;
+}

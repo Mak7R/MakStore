@@ -78,7 +78,7 @@ public static class StartupExtension
                 options.Scope.Add(OidcConstants.StandardScopes.OfflineAccess);
                 
                 options.Scope.Add(MicroservicesConstants.ApiDefaults.ProductsApi);
-                options.Scope.Add("role");
+                options.Scope.Add(MicroservicesConstants.UserClaims.Role);
                 options.ClaimActions.MapJsonKey(ClaimTypes.Role, JwtClaimTypes.Role);
                 
                 options.GetClaimsFromUserInfoEndpoint = true;
@@ -111,7 +111,7 @@ public static class StartupExtension
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        
+        app.UseSerilogRequestLogging();
         if (!app.Environment.IsDevelopment())
         {
             app.UseHttpsRedirection();
@@ -121,7 +121,7 @@ public static class StartupExtension
         }
         
         app.UseMvcExceptionHandlingMiddleware();
-        app.UseSerilogRequestLogging();
+        
 
         app.UseStaticFiles();
 

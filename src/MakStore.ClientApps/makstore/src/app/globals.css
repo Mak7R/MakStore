@@ -1,12 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --background: #ffffff;
+  --background: #FCF6BD;
   --foreground: #171717;
+  --default-color-pink: #FF99C8;
+  --default-color-green: #D0F4DE;
+  --default-color-blue: #A9DEF9;
+  --default-color-purple: #E4C1F9;
+  
+  --fs-lg-1: 32px;
+  --fs-lg-2: 48px;
+  --fs-lg-3: 64px;
+  --fs-lg-4: 86px;
+  
+  --fs-md-1: 16px;
+  --fs-md-2: 20px;
+  --fs-md-3: 24px;
+  --fs-md-4: 28px;
+  
+  --fs-sm-1: 8px;
+  --fs-sm-2: 10px;
+  --fs-sm-3: 12px;
+  --fs-sm-4: 14px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #FCF6BD;
+    --foreground: #171717;
   }
 }
 

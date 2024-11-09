@@ -57,6 +57,23 @@ services:
     networks:
       - makstore_net
   
+  orders_service.makstore:
+    container_name: orders_service.makstore
+    build:
+      context: .
+      dockerfile: src/MakStore.Microservices/OrdersService/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=main_db.makstore;Username=rootuser;Password=DbPass20190502;Database=orders_db
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./DataProtection-Keys:/DataProtection-Keys
+    ports:
+      - "9006:8080"
+    depends_on:
+      - main_db
+    networks:
+      - makstore_net
+  
   # Client Apps
   employeewebclient.makstore:
     container_name: employeewebclient.makstore
