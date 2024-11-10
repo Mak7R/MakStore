@@ -1,26 +1,26 @@
+using MakStore.Domain.Entities.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace MakStore.SharedComponents.Repositories;
 
-public abstract class Repository<TDbContext, TEntity, TId> : IRepository<TEntity, TId>
+public abstract class Repository<TEntity, TId> : IRepository<TEntity, TId>
     where TEntity: Entity<TId>
-    where TDbContext: DbContext
 {
     protected const string DefaultOnExceptionMessage = "An exception was thrown while processing the request to database";
-    
-    protected readonly TDbContext DbContext;
-    protected readonly ILogger<Repository<TDbContext, TEntity, TId>> Logger;
 
-    protected Repository(TDbContext dbContext, ILogger<Repository<TDbContext, TEntity, TId>> logger)
+    private readonly DbContext _dbContext;
+    private readonly ILogger<Repository<TEntity, TId>> _logger;
+
+    protected Repository(DbContext dbContext, ILogger<Repository<TEntity, TId>> logger)
     {
-        DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        Logger = logger;
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        _logger = logger;
     }
     
     private IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec)
     {
-        return SpecificationEvaluator<TEntity, TId>.GetQuery(DbContext.Set<TEntity>().AsNoTracking().AsQueryable(), spec);
+        return SpecificationEvaluator<TEntity, TId>.GetQuery(_dbContext.Set<TEntity>().AsNoTracking().AsQueryable(), spec);
     }
 
     public virtual async Task<IReadOnlyList<TEntity>> GetAsync(ISpecification<TEntity> spec, CancellationToken cancellationToken = default)
@@ -31,7 +31,7 @@ public abstract class Repository<TDbContext, TEntity, TId> : IRepository<TEntity
         }
         catch (Exception e)
         {
-            Logger.LogError(e, DefaultOnExceptionMessage);
+            _logger.LogError(e, DefaultOnExceptionMessage);
             throw;
         }
     }
@@ -44,7 +44,7 @@ public abstract class Repository<TDbContext, TEntity, TId> : IRepository<TEntity
         }
         catch (Exception e)
         {
-            Logger.LogError(e, DefaultOnExceptionMessage);
+            _logger.LogError(e, DefaultOnExceptionMessage);
             throw;
         }
     }
@@ -53,14 +53,14 @@ public abstract class Repository<TDbContext, TEntity, TId> : IRepository<TEntity
     {
         try
         {
-            return await DbContext.Set<TEntity>()
+            return await _dbContext.Set<TEntity>()
                 .AsNoTracking()
                 .Where(e => e.Id != null && e.Id.Equals(id))
                 .SingleOrDefaultAsync(cancellationToken: cancellationToken);
         }
         catch (Exception e)
         {
-            Logger.LogError(e, DefaultOnExceptionMessage);
+            _logger.LogError(e, DefaultOnExceptionMessage);
             throw;
         }
     }
@@ -69,13 +69,13 @@ public abstract class Repository<TDbContext, TEntity, TId> : IRepository<TEntity
     {
         try
         {
-            await DbContext.Set<TEntity>().AddAsync(entity);
-            await DbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.Set<TEntity>().AddAsync(entity);
+            await _dbContext.SaveChangesAsync(cancellationToken);
             return entity;
         }
         catch (Exception e)
         {
-            Logger.LogError(e, DefaultOnExceptionMessage);
+            _logger.LogError(e, DefaultOnExceptionMessage);
             throw;
         }
     }
@@ -84,13 +84,13 @@ public abstract class Repository<TDbContext, TEntity, TId> : IRepository<TEntity
     {
         try
         {
-            DbContext.Entry(entity).State = EntityState.Modified;
-            await DbContext.SaveChangesAsync(cancellationToken);
+            _dbContext.Entry(entity).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync(cancellationToken);
             return entity;
         }
         catch (Exception e)
         {
-            Logger.LogError(e, DefaultOnExceptionMessage);
+            _logger.LogError(e, DefaultOnExceptionMessage);
             throw;
         }
     }
@@ -99,13 +99,13 @@ public abstract class Repository<TDbContext, TEntity, TId> : IRepository<TEntity
     {
         try
         {
-            DbContext.Set<TEntity>().Remove(entity);
-            await DbContext.SaveChangesAsync(cancellationToken);
+            _dbContext.Set<TEntity>().Remove(entity);
+            await _dbContext.SaveChangesAsync(cancellationToken);
             return entity;
         }
         catch (Exception e)
         {
-            Logger.LogError(e, DefaultOnExceptionMessage);
+            _logger.LogError(e, DefaultOnExceptionMessage);
             throw;
         }
     }

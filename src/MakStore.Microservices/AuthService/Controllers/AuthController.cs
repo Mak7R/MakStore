@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using AuthService.Identity;
 using AuthService.Models.Account;
+using MakStore.Domain.Enums;
 using MakStore.SharedComponents.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

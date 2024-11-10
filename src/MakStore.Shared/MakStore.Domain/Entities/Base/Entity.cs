@@ -1,4 +1,4 @@
-namespace MakStore.SharedComponents.Repositories;
+namespace MakStore.Domain.Entities.Base;
 
 public abstract class Entity<TId>
 {

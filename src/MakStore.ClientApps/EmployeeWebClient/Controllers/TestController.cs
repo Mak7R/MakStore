@@ -1,6 +1,6 @@
-using EmployeeWebClient.Configuration.Options;
 using EmployeeWebClient.Models.Product;
 using IdentityModel.Client;
+using MakStore.SharedComponents.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -57,7 +57,7 @@ public class TestController : Controller
             apiClient.SetBearerToken(tokenResponse.AccessToken!);
             var products =
                 await apiClient.GetFromJsonAsync<IEnumerable<ProductViewModel>>(
-                    $"{_options.ProductsService.BaseUrl}/products");
+                    $"{_options.ProductsService.BaseUrl}/api/v1/products");
 
             return Ok(products);
         }

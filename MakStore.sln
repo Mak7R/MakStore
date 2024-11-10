@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService", "src\MakStore
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrdersService", "src\MakStore.Microservices\OrdersService\OrdersService.csproj", "{C4987400-5483-4342-9EA8-0F7DDFA91C01}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationsService", "src\MakStore.Microservices\NotificationsService\NotificationsService.csproj", "{F56E1EBA-8C0D-4314-B2B5-C816E0AB09A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{C4987400-5483-4342-9EA8-0F7DDFA91C01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4987400-5483-4342-9EA8-0F7DDFA91C01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4987400-5483-4342-9EA8-0F7DDFA91C01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F56E1EBA-8C0D-4314-B2B5-C816E0AB09A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F56E1EBA-8C0D-4314-B2B5-C816E0AB09A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F56E1EBA-8C0D-4314-B2B5-C816E0AB09A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F56E1EBA-8C0D-4314-B2B5-C816E0AB09A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,5 +75,6 @@ Global
 		{C8CA4E22-1EAF-49CD-93F9-D7360E548A7D} = {C37D3ADE-1470-47DA-9FD8-7E6BE265804D}
 		{240AEF29-3043-46CB-A36E-083A150B44B9} = {5CC06EDE-03CD-4481-BCA1-AE969E22D41A}
 		{C4987400-5483-4342-9EA8-0F7DDFA91C01} = {5CC06EDE-03CD-4481-BCA1-AE969E22D41A}
+		{F56E1EBA-8C0D-4314-B2B5-C816E0AB09A7} = {5CC06EDE-03CD-4481-BCA1-AE969E22D41A}
 	EndGlobalSection
 EndGlobal

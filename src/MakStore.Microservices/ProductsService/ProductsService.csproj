@@ -26,10 +26,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="ViewModels\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\MakStore.Shared\MakStore.SharedComponents\MakStore.SharedComponents.csproj" />
     </ItemGroup>
 

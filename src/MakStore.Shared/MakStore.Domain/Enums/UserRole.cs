@@ -1,4 +1,4 @@
-namespace AuthService.Identity;
+namespace MakStore.Domain.Enums;
 
 public enum UserRole
 {

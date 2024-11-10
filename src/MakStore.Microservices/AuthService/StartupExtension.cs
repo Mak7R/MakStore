@@ -35,6 +35,7 @@ public static class StartupExtension
                                                ?? throw new ConfigurationException("Connection string 'IdentityServerDb' was not found.");
 
         services.Configure<AdminTokenOptions>(configuration.GetSection("AdminOptions"));
+        services.Configure<DevToolsOptions>(configuration.GetSection("DevTools"));
         
         #endregion
         

@@ -1,6 +1,6 @@
-using MakStore.SharedComponents.Repositories;
+using MakStore.Domain.Entities.Base;
 
-namespace ProductsService.Models;
+namespace MakStore.Domain.Entities;
 
 public class Product : Entity<Guid>
 {

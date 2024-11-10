@@ -1,5 +1,5 @@
+using MakStore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using OrdersService.Models;
 
 namespace OrdersService.Data;
 

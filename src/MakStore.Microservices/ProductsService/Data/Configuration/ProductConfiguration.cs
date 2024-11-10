@@ -1,6 +1,6 @@
+using MakStore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ProductsService.Models;
 
 namespace ProductsService.Data.Configuration;
 

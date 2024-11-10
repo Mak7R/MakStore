@@ -1,6 +1,7 @@
-using MakStore.SharedComponents.Repositories;
+using MakStore.Domain.Entities.Base;
+using MakStore.Domain.Enums;
 
-namespace OrdersService.Models;
+namespace MakStore.Domain.Entities;
 
 public class Order : Entity<Guid>
 {

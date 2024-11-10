@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using EmployeeWebClient.Configuration.Options;
 using EmployeeWebClient.Middlewares;
 using EmployeeWebClient.Services;
 using IdentityModel;

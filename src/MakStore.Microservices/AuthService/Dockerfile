@@ -16,6 +16,9 @@ USER $APP_UID
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["src/MakStore.Shared/MakStore.Domain/MakStore.Domain.csproj", "src/MakStore.Shared/MakStore.Domain/"]
+COPY ["src/MakStore.Shared/MakStore.SharedComponents/MakStore.SharedComponents.csproj", "src/MakStore.Shared/MakStore.SharedComponents/"]
+
 COPY ["src/MakStore.Microservices/AuthService/AuthService.csproj", "src/MakStore.Microservices/AuthService/"]
 RUN dotnet restore "src/MakStore.Microservices/AuthService/AuthService.csproj"
 COPY . .

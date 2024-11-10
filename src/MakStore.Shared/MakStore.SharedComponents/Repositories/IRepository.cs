@@ -1,3 +1,5 @@
+using MakStore.Domain.Entities.Base;
+
 namespace MakStore.SharedComponents.Repositories;
 
 public interface IRepository<TEntity, TId>

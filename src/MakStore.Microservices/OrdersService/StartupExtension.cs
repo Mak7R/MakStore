@@ -13,7 +13,12 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OrdersService.Configuration;
 using OrdersService.Data;
+using OrdersService.Infrastructure.Repositories;
+using OrdersService.Interfaces;
+using OrdersService.Services;
 using Serilog;
+using MassTransit;
+using ConfigurationException = MakStore.SharedComponents.Exceptions.ConfigurationException;
 
 namespace OrdersService;
 
@@ -36,6 +41,8 @@ public static class StartupExtension
         var jwtOidcOptionsSection = configuration.GetSection("JwtOidcOptions");
         var jwtOidcOptions = jwtOidcOptionsSection.Get<JwtOidcOptions>() ?? throw new ConfigurationException("JwtOidcOptions was not configured");
         services.Configure<JwtOidcOptions>(jwtOidcOptionsSection);
+        
+        services.Configure<ServicesOptions>(builder.Configuration.GetSection("Services"));
         
         #endregion
         
@@ -134,6 +141,26 @@ public static class StartupExtension
         services.AddDbContext<OrdersDbContext>(options =>
             options.UseNpgsql(defaultConnection));
 
+        services.AddScoped<IOrdersRepository, OrdersRepository>();
+
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumers(currentAssembly);
+            x.AddSagaStateMachines(currentAssembly);
+            x.AddSagas(currentAssembly);
+            x.AddActivities(currentAssembly);
+            
+            x.UsingRabbitMq((context,cfg) =>
+            {
+                cfg.Host("rabbitmq.makstore", "/", h => {
+                    h.Username("rootuser");
+                    h.Password("DbPass20190502");
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+        
         #endregion
 
         #region AddFeatures
@@ -145,6 +172,9 @@ public static class StartupExtension
         services.AddValidatorsFromAssembly(currentAssembly);
         services.AddAutoMapper(currentAssembly);
 
+        services.AddScoped<IProductsServiceClient, ProductsServiceClient>();
+        services.AddScoped<IUsersServiceClient, UsersServiceClient>();
+        
         #endregion
         
         return builder;

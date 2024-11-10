@@ -1,9 +1,9 @@
 using FluentValidation;
+using MakStore.Domain.Entities;
 using MakStore.SharedComponents.Exceptions;
 using MediatR;
 using ProductsService.Infrastructure.Repositories;
 using ProductsService.Mapping;
-using ProductsService.Models;
 using ValidationException = MakStore.SharedComponents.Exceptions.ValidationException;
 
 namespace ProductsService.Mediator.Commands.CreateProductCommand;

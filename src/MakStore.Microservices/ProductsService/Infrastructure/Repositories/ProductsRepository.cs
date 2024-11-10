@@ -1,25 +1,30 @@
+using MakStore.Domain.Entities;
 using MakStore.SharedComponents.Repositories;
 using Microsoft.EntityFrameworkCore;
 using ProductsService.Data;
-using ProductsService.Models;
 
 namespace ProductsService.Infrastructure.Repositories;
 
-public class ProductsRepository : Repository<ProductsDbContext, Product, Guid>, IProductsRepository
+public class ProductsRepository : Repository<Product, Guid>, IProductsRepository
 {
-    public ProductsRepository(ProductsDbContext dbContext, ILogger<Repository<ProductsDbContext, Product, Guid>> logger) : base(dbContext, logger)
+    private readonly ProductsDbContext _dbContext;
+    private readonly ILogger<Repository<Product, Guid>> _logger;
+
+    public ProductsRepository(ProductsDbContext dbContext, ILogger<Repository<Product, Guid>> logger) : base(dbContext, logger)
     {
+        _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<Product?> FindByNameAsync(string name, CancellationToken cancellationToken = default)
     {
         try
         {
-            return await DbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Name == name, cancellationToken: cancellationToken);
+            return await _dbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Name == name, cancellationToken: cancellationToken);
         }
         catch (Exception e)
         {
-            Logger.LogError(e, DefaultOnExceptionMessage);
+            _logger.LogError(e, DefaultOnExceptionMessage);
             throw;
         }
     }

@@ -1,6 +1,5 @@
-import styles from "./page.module.css";
 import {getServerSession} from "next-auth";
-import {authOptions} from "@/app/api/auth/[...nextauth]/route";
+import {authOptions} from "@/app/api/auth/[...nextauth]/auth-options";
 import React from "react";
 
 export default async function HomePage() {

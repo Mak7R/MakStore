@@ -16,8 +16,20 @@ services:
     networks:
       - makstore_net
   
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq.makstore
+    ports:
+      - "9007:5672"
+      - "9008:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: rootuser
+      RABBITMQ_DEFAULT_PASS: DbPass20190502
+    networks:
+      - makstore_net
+  
   # Microservices  
-  auth_service.makstore:
+  auth_service:
     container_name: auth_service.makstore
     build:
       context: .
@@ -40,7 +52,7 @@ services:
     networks:
       - makstore_net
   
-  products_service.makstore:
+  products_service:
     container_name: products_service.makstore
     build:
       context: .
@@ -57,7 +69,7 @@ services:
     networks:
       - makstore_net
   
-  orders_service.makstore:
+  orders_service:
     container_name: orders_service.makstore
     build:
       context: .
@@ -74,8 +86,24 @@ services:
     networks:
       - makstore_net
   
+  notifications_service:
+    container_name: notifications_service.makstore
+    build:
+      context: .
+      dockerfile: src/MakStore.Microservices/NotificationsService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./DataProtection-Keys:/DataProtection-Keys
+    ports:
+      - "9009:8080"
+    depends_on:
+      - rabbitmq
+    networks:
+      - makstore_net
+  
   # Client Apps
-  employeewebclient.makstore:
+  employeewebclient:
     container_name: employeewebclient.makstore
     build:
       context: .
@@ -87,11 +115,11 @@ services:
     ports:
       - "9002:8080"
     depends_on:
-      - auth_service.makstore
+      - auth_service
     networks:
       - makstore_net
   
-  next.makstore:
+  nextjs:
     container_name: next.makstore
     build:
       context: src/MakStore.ClientApps/makstore
@@ -101,7 +129,7 @@ services:
     environment:
       - NODE_ENV=production
     depends_on:
-        - auth_service.makstore
+        - auth_service
     networks:
       - makstore_net
   
@@ -115,8 +143,8 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - next.makstore
-      - employeewebclient.makstore
+      - nextjs
+      - employeewebclient
     networks:
       - makstore_net
 

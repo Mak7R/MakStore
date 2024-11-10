@@ -3,6 +3,7 @@ using AuthService.Configuration.Options;
 using IdentityModel.Client;
 using MakStore.SharedComponents.Api;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace AuthService.Controllers;
 
@@ -12,15 +13,11 @@ public class DevToolsController : ApiController
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly DevToolsOptions? _devToolsOptions;
 
-    public DevToolsController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public DevToolsController(IHttpClientFactory httpClientFactory, IOptions<DevToolsOptions> options)
     {
         _httpClientFactory = httpClientFactory;
 
-
-        var devToolsOptionsSection = configuration.GetSection("DevTools");
-        
-        var devToolsOptions = devToolsOptionsSection.Get<DevToolsOptions>();
-        _devToolsOptions = devToolsOptions;
+        _devToolsOptions = options.Value;
     }
     
     [HttpGet("dev-tools/get-access-token")]

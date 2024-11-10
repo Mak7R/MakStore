@@ -1,5 +1,5 @@
+using MakStore.Domain.Entities;
 using MakStore.SharedComponents.Repositories;
-using ProductsService.Models;
 
 namespace ProductsService.Infrastructure.Specification;
 

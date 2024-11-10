@@ -1,3 +1,4 @@
+using MakStore.Domain.Entities.Base;
 using Microsoft.EntityFrameworkCore;
 
 namespace MakStore.SharedComponents.Repositories;

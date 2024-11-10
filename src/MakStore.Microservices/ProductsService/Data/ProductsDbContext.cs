@@ -1,5 +1,5 @@
+using MakStore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using ProductsService.Models;
 
 namespace ProductsService.Data;
 

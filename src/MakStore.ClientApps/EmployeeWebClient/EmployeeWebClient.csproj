@@ -25,4 +25,8 @@
       <ProjectReference Include="..\..\MakStore.Shared\MakStore.SharedComponents\MakStore.SharedComponents.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Configuration\" />
+    </ItemGroup>
+
 </Project>

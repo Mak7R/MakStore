@@ -4,6 +4,7 @@ using AuthService.Models.Account;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Services;
 using IdentityModel;
+using MakStore.Domain.Enums;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

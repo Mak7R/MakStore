@@ -1,9 +1,9 @@
 using AutoMapper;
+using MakStore.Domain.Entities;
 using ProductsService.Dtos;
 using ProductsService.Mediator.Commands.CreateProductCommand;
 using ProductsService.Mediator.Commands.DeleteProductCommand;
 using ProductsService.Mediator.Commands.UpdateProductCommand;
-using ProductsService.Models;
 
 namespace ProductsService.Mapping;
 

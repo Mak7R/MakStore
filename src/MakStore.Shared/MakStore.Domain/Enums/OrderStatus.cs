@@ -1,4 +1,4 @@
-namespace OrdersService.Models;
+namespace MakStore.Domain.Enums;
 
 public enum OrderStatus
 {
